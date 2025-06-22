@@ -1,0 +1,44 @@
+package ecommerce;
+
+import java.util.Scanner;
+
+public class ProductSearch {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        String[] productList = {
+            "Desk Lamp", "Gaming Console", "Bluetooth Speaker", "Fitness Tracker",
+            "E-reader", "Wireless Mouse", "Graphics Card", "Webcam", "USB Hub", "Projector"
+        };
+
+        System.out.println("🔍 E-Store Quick Search Tool");
+        System.out.println("Enter a product name to check availability (type 'quit' to exit)");
+
+        while (true) {
+            System.out.print("\n🔎 Search for a product: ");
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("quit")) {
+                System.out.println("📦 Thank you for using E-Store. Have a great day!");
+                break;
+            }
+
+            boolean matchFound = false;
+            for (String item : productList) {
+                if (item.equalsIgnoreCase(input)) {
+                    matchFound = true;
+                    break;
+                }
+            }
+
+            if (matchFound) {
+                System.out.println("✅ '" + input + "' is available in our inventory!");
+            } else {
+                System.out.println("❌ Sorry, we couldn't find '" + input + "' in stock.");
+            }
+        }
+
+        scanner.close();
+    }
+}
