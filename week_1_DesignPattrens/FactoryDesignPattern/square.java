@@ -1,0 +1,8 @@
+package factoryDesignPattern;
+
+public class Square implements Shape {
+    @Override
+    public void render() {
+        System.out.println("◼️ Rendering Square");
+    }
+}
