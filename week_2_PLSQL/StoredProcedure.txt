@@ -1,0 +1,55 @@
+package bankprocess;
+
+import java.sql.*;
+
+public class StoredProcedureDemo {
+    public static void main(String[] args) {
+        String url = "jdbc:oracle:thin:@localhost:1521:XE";  // Replace with your DB URL
+        String username = "your_username";                  // Replace with your username
+        String password = "your_password";                  // Replace with your password
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            // Scenario 1: Process monthly interest
+            processMonthlyInterest(conn);
+
+            // Scenario 2: Update employee bonus
+            updateEmployeeBonus(conn, 10, 5); // department_id=10, bonus=5%
+
+            // Scenario 3: Transfer funds
+            transferFunds(conn, 101, 102, 200.00);
+
+            System.out.println("All stored procedures executed successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void processMonthlyInterest(Connection conn) throws SQLException {
+        String call = "{call ProcessMonthlyInterest}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.execute();
+            System.out.println("Scenario 1: ProcessMonthlyInterest executed.");
+        }
+    }
+
+    private static void updateEmployeeBonus(Connection conn, int departmentId, double bonusPercentage) throws SQLException {
+        String call = "{call UpdateEmployeeBonus(?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.setInt(1, departmentId);
+            cs.setDouble(2, bonusPercentage);
+            cs.execute();
+            System.out.println("Scenario 2: UpdateEmployeeBonus executed for department " + departmentId);
+        }
+    }
+
+    private static void transferFunds(Connection conn, int fromAccountId, int toAccountId, double amount) throws SQLException {
+        String call = "{call TransferFunds(?, ?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.setInt(1, fromAccountId);
+            cs.setInt(2, toAccountId);
+            cs.setDouble(3, amount);
+            cs.execute();
+            System.out.println("Scenario 3: TransferFunds executed from account " + fromAccountId + " to " + toAccountId);
+        }
+    }
+}

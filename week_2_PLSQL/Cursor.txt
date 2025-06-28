@@ -1,0 +1,64 @@
+package bankprocess;
+
+import java.sql.*;
+
+public class CursorDemo {
+    public static void main(String[] args) {
+        String url = "jdbc:oracle:thin:@localhost:1521:XE";  // Replace with your DB URL
+        String username = "your_username";                   // Replace with your DB username
+        String password = "your_password";                   // Replace with your DB password
+
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             Statement stmt = conn.createStatement()) {
+
+            // Scenario 1: GenerateMonthlyStatements
+            String plsql1 =
+                "DECLARE " +
+                "  CURSOR c_trans IS " +
+                "    SELECT customer_id, transaction_id, amount, transaction_date " +
+                "    FROM transactions " +
+                "    WHERE TRUNC(transaction_date, 'MM') = TRUNC(SYSDATE, 'MM'); " +
+                "BEGIN " +
+                "  FOR rec IN c_trans LOOP " +
+                "    DBMS_OUTPUT.PUT_LINE('Customer ' || rec.customer_id || ': Txn ' || rec.transaction_id || ' Amount: ' || rec.amount || ' Date: ' || rec.transaction_date); " +
+                "  END LOOP; " +
+                "END;";
+
+            stmt.execute(plsql1);
+            System.out.println("Scenario 1: GenerateMonthlyStatements executed.");
+
+            // Scenario 2: ApplyAnnualFee
+            String plsql2 =
+                "DECLARE " +
+                "  CURSOR c_accounts IS SELECT account_id FROM accounts; " +
+                "BEGIN " +
+                "  FOR rec IN c_accounts LOOP " +
+                "    UPDATE accounts SET balance = balance - 100 WHERE account_id = rec.account_id; " +
+                "  END LOOP; " +
+                "  COMMIT; " +
+                "END;";
+
+            stmt.execute(plsql2);
+            System.out.println("Scenario 2: ApplyAnnualFee executed.");
+
+            // Scenario 3: UpdateLoanInterestRates
+            String plsql3 =
+                "DECLARE " +
+                "  CURSOR c_loans IS SELECT loan_id, interest_rate FROM loans; " +
+                "BEGIN " +
+                "  FOR rec IN c_loans LOOP " +
+                "    UPDATE loans SET interest_rate = rec.interest_rate + 0.5 WHERE loan_id = rec.loan_id; " +
+                "  END LOOP; " +
+                "  COMMIT; " +
+                "END;";
+
+            stmt.execute(plsql3);
+            System.out.println("Scenario 3: UpdateLoanInterestRates executed.");
+
+            System.out.println("All cursor-based PL/SQL blocks executed successfully.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}

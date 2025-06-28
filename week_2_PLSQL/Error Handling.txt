@@ -1,0 +1,58 @@
+package bankprocess;
+
+import java.sql.*;
+
+public class ErrorHandlingDemo {
+    public static void main(String[] args) {
+        String url = "jdbc:oracle:thin:@localhost:1521:XE"; // replace with your DB URL
+        String username = "your_username";
+        String password = "your_password";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            // Scenario 1: Transfer funds safely
+            safeTransferFunds(conn, 101, 102, 500);
+
+            // Scenario 2: Update employee salary safely
+            updateSalary(conn, 201, 10); // increase by 10%
+
+            // Scenario 3: Add new customer safely
+            addNewCustomer(conn, 301, "John Doe", 45);
+
+            System.out.println("All procedures executed successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void safeTransferFunds(Connection conn, int fromAccount, int toAccount, double amount) throws SQLException {
+        String call = "{call SafeTransferFunds(?, ?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.setInt(1, fromAccount);
+            cs.setInt(2, toAccount);
+            cs.setDouble(3, amount);
+            cs.execute();
+            System.out.println("Scenario 1: SafeTransferFunds executed.");
+        }
+    }
+
+    private static void updateSalary(Connection conn, int employeeId, double percentage) throws SQLException {
+        String call = "{call UpdateSalary(?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.setInt(1, employeeId);
+            cs.setDouble(2, percentage);
+            cs.execute();
+            System.out.println("Scenario 2: UpdateSalary executed.");
+        }
+    }
+
+    private static void addNewCustomer(Connection conn, int customerId, String name, int age) throws SQLException {
+        String call = "{call AddNewCustomer(?, ?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.setInt(1, customerId);
+            cs.setString(2, name);
+            cs.setInt(3, age);
+            cs.execute();
+            System.out.println("Scenario 3: AddNewCustomer executed.");
+        }
+    }
+}

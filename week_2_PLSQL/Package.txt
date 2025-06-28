@@ -1,0 +1,116 @@
+package bankprocess;
+
+import java.sql.*;
+
+public class PackageDemo {
+    public static void main(String[] args) {
+        String url = "jdbc:oracle:thin:@localhost:1521:XE";  // Replace with your DB URL
+        String username = "your_username";                   // Replace with your DB username
+        String password = "your_password";                   // Replace with your DB password
+
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             Statement stmt = conn.createStatement()) {
+
+            // Scenario 1: CustomerManagement package
+            String pkg1 =
+                "CREATE OR REPLACE PACKAGE CustomerManagement AS " +
+                "  PROCEDURE AddCustomer(p_id NUMBER, p_name VARCHAR2, p_balance NUMBER); " +
+                "  PROCEDURE UpdateCustomer(p_id NUMBER, p_name VARCHAR2); " +
+                "  FUNCTION GetCustomerBalance(p_id NUMBER) RETURN NUMBER; " +
+                "END;";
+
+            String pkg1Body =
+                "CREATE OR REPLACE PACKAGE BODY CustomerManagement AS " +
+                "  PROCEDURE AddCustomer(p_id NUMBER, p_name VARCHAR2, p_balance NUMBER) IS " +
+                "  BEGIN " +
+                "    INSERT INTO customers(customer_id, name, balance) VALUES(p_id, p_name, p_balance); " +
+                "    COMMIT; " +
+                "  END; " +
+                "  PROCEDURE UpdateCustomer(p_id NUMBER, p_name VARCHAR2) IS " +
+                "  BEGIN " +
+                "    UPDATE customers SET name = p_name WHERE customer_id = p_id; " +
+                "    COMMIT; " +
+                "  END; " +
+                "  FUNCTION GetCustomerBalance(p_id NUMBER) RETURN NUMBER IS " +
+                "    v_balance NUMBER; " +
+                "  BEGIN " +
+                "    SELECT balance INTO v_balance FROM customers WHERE customer_id = p_id; " +
+                "    RETURN v_balance; " +
+                "  END; " +
+                "END;";
+
+            stmt.execute(pkg1);
+            stmt.execute(pkg1Body);
+            System.out.println("Scenario 1: Package CustomerManagement created.");
+
+            // Scenario 2: EmployeeManagement package
+            String pkg2 =
+                "CREATE OR REPLACE PACKAGE EmployeeManagement AS " +
+                "  PROCEDURE HireEmployee(p_id NUMBER, p_name VARCHAR2, p_salary NUMBER); " +
+                "  PROCEDURE UpdateEmployee(p_id NUMBER, p_name VARCHAR2); " +
+                "  FUNCTION CalculateAnnualSalary(p_id NUMBER) RETURN NUMBER; " +
+                "END;";
+
+            String pkg2Body =
+                "CREATE OR REPLACE PACKAGE BODY EmployeeManagement AS " +
+                "  PROCEDURE HireEmployee(p_id NUMBER, p_name VARCHAR2, p_salary NUMBER) IS " +
+                "  BEGIN " +
+                "    INSERT INTO employees(employee_id, name, salary) VALUES(p_id, p_name, p_salary); " +
+                "    COMMIT; " +
+                "  END; " +
+                "  PROCEDURE UpdateEmployee(p_id NUMBER, p_name VARCHAR2) IS " +
+                "  BEGIN " +
+                "    UPDATE employees SET name = p_name WHERE employee_id = p_id; " +
+                "    COMMIT; " +
+                "  END; " +
+                "  FUNCTION CalculateAnnualSalary(p_id NUMBER) RETURN NUMBER IS " +
+                "    v_salary NUMBER; " +
+                "  BEGIN " +
+                "    SELECT salary INTO v_salary FROM employees WHERE employee_id = p_id; " +
+                "    RETURN v_salary * 12; " +
+                "  END; " +
+                "END;";
+
+            stmt.execute(pkg2);
+            stmt.execute(pkg2Body);
+            System.out.println("Scenario 2: Package EmployeeManagement created.");
+
+            // Scenario 3: AccountOperations package
+            String pkg3 =
+                "CREATE OR REPLACE PACKAGE AccountOperations AS " +
+                "  PROCEDURE OpenAccount(p_id NUMBER, p_customer_id NUMBER, p_balance NUMBER); " +
+                "  PROCEDURE CloseAccount(p_id NUMBER); " +
+                "  FUNCTION GetTotalBalance(p_customer_id NUMBER) RETURN NUMBER; " +
+                "END;";
+
+            String pkg3Body =
+                "CREATE OR REPLACE PACKAGE BODY AccountOperations AS " +
+                "  PROCEDURE OpenAccount(p_id NUMBER, p_customer_id NUMBER, p_balance NUMBER) IS " +
+                "  BEGIN " +
+                "    INSERT INTO accounts(account_id, customer_id, balance) VALUES(p_id, p_customer_id, p_balance); " +
+                "    COMMIT; " +
+                "  END; " +
+                "  PROCEDURE CloseAccount(p_id NUMBER) IS " +
+                "  BEGIN " +
+                "    DELETE FROM accounts WHERE account_id = p_id; " +
+                "    COMMIT; " +
+                "  END; " +
+                "  FUNCTION GetTotalBalance(p_customer_id NUMBER) RETURN NUMBER IS " +
+                "    v_total NUMBER; " +
+                "  BEGIN " +
+                "    SELECT SUM(balance) INTO v_total FROM accounts WHERE customer_id = p_customer_id; " +
+                "    RETURN NVL(v_total, 0); " +
+                "  END; " +
+                "END;";
+
+            stmt.execute(pkg3);
+            stmt.execute(pkg3Body);
+            System.out.println("Scenario 3: Package AccountOperations created.");
+
+            System.out.println("All packages created successfully.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}

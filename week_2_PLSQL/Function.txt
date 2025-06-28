@@ -1,0 +1,61 @@
+package bankprocess;
+
+import java.sql.*;
+
+public class FunctionDemo {
+    public static void main(String[] args) {
+        String url = "jdbc:oracle:thin:@localhost:1521:XE";  // replace with your DB URL
+        String username = "your_username";                   // replace with your username
+        String password = "your_password";                   // replace with your password
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            // Scenario 1: Calculate age
+            int age = calculateAge(conn, Date.valueOf("1995-08-15")); // example DOB
+            System.out.println("Scenario 1: Customer age = " + age);
+
+            // Scenario 2: Calculate monthly installment
+            double installment = calculateMonthlyInstallment(conn, 50000, 7.5, 5); // loanAmount, interestRate, years
+            System.out.printf("Scenario 2: Monthly installment = %.2f%n", installment);
+
+            // Scenario 3: Check sufficient balance
+            boolean hasBalance = hasSufficientBalance(conn, 101, 2000.00); // accountId, amount
+            System.out.println("Scenario 3: Has sufficient balance? " + hasBalance);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static int calculateAge(Connection conn, Date dob) throws SQLException {
+        String call = "{? = call CalculateAge(?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.registerOutParameter(1, Types.INTEGER);
+            cs.setDate(2, dob);
+            cs.execute();
+            return cs.getInt(1);
+        }
+    }
+
+    private static double calculateMonthlyInstallment(Connection conn, double amount, double interestRate, int years) throws SQLException {
+        String call = "{? = call CalculateMonthlyInstallment(?, ?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.registerOutParameter(1, Types.DOUBLE);
+            cs.setDouble(2, amount);
+            cs.setDouble(3, interestRate);
+            cs.setInt(4, years);
+            cs.execute();
+            return cs.getDouble(1);
+        }
+    }
+
+    private static boolean hasSufficientBalance(Connection conn, int accountId, double amount) throws SQLException {
+        String call = "{? = call HasSufficientBalance(?, ?)}";
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            cs.registerOutParameter(1, Types.INTEGER); // Oracle BOOLEAN is usually returned as NUMBER(1)
+            cs.setInt(2, accountId);
+            cs.setDouble(3, amount);
+            cs.execute();
+            return cs.getInt(1) == 1;
+        }
+    }
+}
