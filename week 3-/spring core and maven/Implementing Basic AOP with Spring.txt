@@ -1,0 +1,59 @@
+import org.aspectj.lang.JoinPoint;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+
+public class LibraryManagementApplication {
+
+    public static void main(String[] args) {
+        GenericApplicationContext context = new GenericXmlApplicationContext(
+            new ByteArrayResource(XML_CONFIG.getBytes())
+        );
+
+        BookService service = context.getBean(BookService.class);
+        service.displayBook();
+
+        context.close();
+    }
+
+    
+    private static final String XML_CONFIG =
+        "<?xml version='1.0' encoding='UTF-8'?>" +
+        "<beans xmlns='http://www.springframework.org/schema/beans'" +
+        "       xmlns:aop='http://www.springframework.org/schema/aop'" +
+        "       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'" +
+        "       xsi:schemaLocation='http://www.springframework.org/schema/beans " +
+        "           http://www.springframework.org/schema/beans/spring-beans.xsd " +
+        "           http://www.springframework.org/schema/aop " +
+        "           http://www.springframework.org/schema/aop/spring-aop.xsd'>" +
+
+        "   <bean id='bookService' class='LibraryManagementApplication$BookService'/>" +
+        "   <bean id='loggingAspect' class='LibraryManagementApplication$LoggingAspect'/>" +
+
+        "   <aop:config>" +
+        "       <aop:aspect ref='loggingAspect'>" +
+        "           <aop:pointcut id='serviceMethods' expression='execution(* LibraryManagementApplication$BookService.*(..))'/>" +
+        "           <aop:before pointcut-ref='serviceMethods' method='beforeAdvice'/>" +
+        "           <aop:after pointcut-ref='serviceMethods' method='afterAdvice'/>" +
+        "       </aop:aspect>" +
+        "   </aop:config>" +
+
+        "</beans>";
+
+        public static class BookService {
+        public void displayBook() {
+            System.out.println("Book Retrieved: Clean Code by Robert C. Martin");
+        }
+    }
+
+     public static class LoggingAspect {
+        public void beforeAdvice(JoinPoint joinPoint) {
+            System.out.println("[LOG] Before method: " + joinPoint.getSignature().getName());
+        }
+
+        public void afterAdvice(JoinPoint joinPoint) {
+            System.out.println("[LOG] After method: " + joinPoint.getSignature().getName());
+        }
+    }
+}

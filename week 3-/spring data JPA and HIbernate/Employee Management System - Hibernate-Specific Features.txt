@@ -1,0 +1,85 @@
+
+
+package com.example.employeemanagementsystem;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+@SpringBootApplication
+public class EmployeeManagementSystemApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(EmployeeManagementSystemApplication.class, args);
+    }
+}
+
+@Entity
+@Data
+@DynamicInsert
+@DynamicUpdate
+@BatchSize(size = 20)
+class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length = 100, unique = true)
+    private String name;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+}
+
+@Entity
+@Data
+@BatchSize(size = 10)
+class Department {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(length = 50)
+    private String name;
+}
+
+interface EmployeeRepository extends JpaRepository<Employee, Long> { }
+
+
+@Service
+class EmployeeBatchService {
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Transactional
+    public List<Employee> saveEmployeesInBatch(List<Employee> employees) {
+        return employeeRepository.saveAll(employees);
+    }
+}
+
+@RestController
+@RequestMapping("/batch")
+class BatchController {
+    @Autowired
+    private EmployeeBatchService batchService;
+
+    @PostMapping("/employees")
+    public List<Employee> saveEmployees(@RequestBody List<Employee> employees) {
+        return batchService.saveEmployeesInBatch(employees);
+    }
+}

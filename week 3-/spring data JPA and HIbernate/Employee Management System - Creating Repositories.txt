@@ -1,0 +1,22 @@
+package com.example.employeemanagementsystem.repository;
+
+import com.example.employeemanagementsystem.entity.Employee;
+import com.example.employeemanagementsystem.entity.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+
+public interface DepartmentRepository extends JpaRepository<Department, Long> {
+   
+    List<Department> findByName(String name);
+}
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    
+    List<Employee> findByName(String name);
+
+    Employee findByEmail(String email);
+
+
+    List<Employee> findByDepartmentId(Long departmentId);
+}

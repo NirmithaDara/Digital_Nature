@@ -1,0 +1,46 @@
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+
+public class LibraryApp {
+
+    public static void main(String[] args) {
+        GenericApplicationContext context = new GenericXmlApplicationContext(new org.springframework.core.io.ByteArrayResource(XML_CONFIG.getBytes()));
+
+        BookService bookService = context.getBean("bookService", BookService.class);
+        bookService.displayBook();
+
+        context.close();
+    }
+
+      private static final String XML_CONFIG = 
+        "<?xml version='1.0' encoding='UTF-8'?>" +
+        "<beans xmlns='http://www.springframework.org/schema/beans' " +
+        "       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' " +
+        "       xsi:schemaLocation='http://www.springframework.org/schema/beans " +
+        "                           http://www.springframework.org/schema/beans/spring-beans.xsd'>" +
+
+        "   <bean id='bookRepository' class='LibraryApp$BookRepository'/>" +
+        "   <bean id='bookService' class='LibraryApp$BookService'>" +
+        "       <property name='bookRepository' ref='bookRepository'/>" +
+        "   </bean>" +
+        "</beans>";
+
+       public static class BookRepository {
+        public String getBook() {
+            return "The Great Gatsby by F. Scott Fitzgerald";
+        }
+    }
+
+        public static class BookService {
+        private BookRepository bookRepository;
+
+        public void setBookRepository(BookRepository bookRepository) {
+            this.bookRepository = bookRepository;
+        }
+
+        public void displayBook() {
+            System.out.println("Book Retrieved: " + bookRepository.getBook());
+        }
+    }
+}

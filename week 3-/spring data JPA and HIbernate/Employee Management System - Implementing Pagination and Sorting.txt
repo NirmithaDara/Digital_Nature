@@ -1,0 +1,79 @@
+
+package com.example.employeemanagementsystem.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
+
+
+@Entity
+@Data
+@NamedQuery(
+    name = "Department.findByDepartmentName",
+    query = "SELECT d FROM Department d WHERE d.name = :name"
+)
+public class Department {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
+    private List<Employee> employees;
+}
+
+@Entity
+@Data
+@NamedQuery(
+    name = "Employee.findByEmployeeEmail",
+    query = "SELECT e FROM Employee e WHERE e.email = :email"
+)
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+}
+
+
+package com.example.employeemanagementsystem.repository;
+
+import com.example.employeemanagementsystem.entity.Employee;
+import com.example.employeemanagementsystem.entity.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface DepartmentRepository extends JpaRepository<Department, Long> {
+
+
+    List<Department> findByName(String name);
+
+    @Query("SELECT d FROM Department d WHERE d.name LIKE %:keyword%")
+    List<Department> searchByNameContaining(@Param("keyword") String keyword);
+}
+
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+ 
+    List<Employee> findByName(String name);
+
+    Employee findByEmail(String email);
+
+
+    List<Employee> findByDepartmentId(Long departmentId);
+
+
+    @Query("SELECT e FROM Employee e WHERE e.name LIKE :prefix%")
+    List<Employee> findByNameStartingWith(@Param("prefix") String prefix);
+}

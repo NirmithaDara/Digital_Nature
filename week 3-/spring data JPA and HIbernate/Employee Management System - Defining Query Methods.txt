@@ -1,0 +1,122 @@
+
+package com.example.employeemanagementsystem.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
+
+@Entity
+@Data
+public class Department {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
+    private List<Employee> employees;
+}
+
+@Entity
+@Data
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private String email;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+}
+
+package com.example.employeemanagementsystem.repository;
+
+import com.example.employeemanagementsystem.entity.Employee;
+import com.example.employeemanagementsystem.entity.Department;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> { }
+
+public interface DepartmentRepository extends JpaRepository<Department, Long> { }
+
+package com.example.employeemanagementsystem.controller;
+
+import com.example.employeemanagementsystem.entity.Employee;
+import com.example.employeemanagementsystem.entity.Department;
+import com.example.employeemanagementsystem.repository.EmployeeRepository;
+import com.example.employeemanagementsystem.repository.DepartmentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/employees")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @PostMapping
+    public Employee create(@RequestBody Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    @GetMapping
+    public List<Employee> getAll() {
+        return employeeRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Employee getById(@PathVariable Long id) {
+        return employeeRepository.findById(id).orElse(null);
+    }
+
+    @PutMapping("/{id}")
+    public Employee update(@PathVariable Long id, @RequestBody Employee employee) {
+        employee.setId(id);
+        return employeeRepository.save(employee);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        employeeRepository.deleteById(id);
+    }
+}
+
+@RestController
+@RequestMapping("/departments")
+public class DepartmentController {
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @PostMapping
+    public Department create(@RequestBody Department department) {
+        return departmentRepository.save(department);
+    }
+
+    @GetMapping
+    public List<Department> getAll() {
+        return departmentRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Department getById(@PathVariable Long id) {
+        return departmentRepository.findById(id).orElse(null);
+    }
+
+    @PutMapping("/{id}")
+    public Department update(@PathVariable Long id, @RequestBody Department department) {
+        department.setId(id);
+        return departmentRepository.save(department);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        departmentRepository.deleteById(id);
+    }
+}

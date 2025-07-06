@@ -1,0 +1,76 @@
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.persistence.*;
+import java.util.List;
+import java.util.Optional;
+
+@SpringBootApplication
+public class LibraryManagementApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(LibraryManagementApplication.class, args);
+    }
+
+        @RestController
+    @RequestMapping("/books")
+    public static class BookController {
+
+        @Autowired
+        private BookRepository bookRepository;
+
+        @GetMapping
+        public List<Book> getAllBooks() {
+            return bookRepository.findAll();
+        }
+
+        @GetMapping("/{id}")
+        public Book getBookById(@PathVariable Long id) {
+            return bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+        }
+
+        @PostMapping
+        public Book addBook(@RequestBody Book book) {
+            return bookRepository.save(book);
+        }
+
+        @PutMapping("/{id}")
+        public Book updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+            Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+            book.setTitle(bookDetails.getTitle());
+            book.setAuthor(bookDetails.getAuthor());
+            return bookRepository.save(book);
+        }
+
+        @DeleteMapping("/{id}")
+        public void deleteBook(@PathVariable Long id) {
+            bookRepository.deleteById(id);
+        }
+    }
+
+
+    @Entity
+    public static class Book {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        private String title;
+        private String author;
+
+                public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+
+        public String getAuthor() { return author; }
+        public void setAuthor(String author) { this.author = author; }
+    }
+
+       @Repository
+    public interface BookRepository extends JpaRepository<Book, Long> {}
+}

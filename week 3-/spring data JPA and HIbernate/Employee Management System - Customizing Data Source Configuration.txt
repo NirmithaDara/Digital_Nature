@@ -1,0 +1,74 @@
+
+package com.example.employeemanagementsystem.config;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.*;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.*;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
+@Configuration
+public class DataSourceConfig {
+
+    @Bean
+    @Primary
+    @ConfigurationProperties("spring.datasource.primary")
+    public DataSourceProperties primaryDataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @Primary
+    public DataSource primaryDataSource() {
+        return primaryDataSourceProperties().initializeDataSourceBuilder().build();
+    }
+
+    @Bean
+    @Primary
+    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
+            @Qualifier("primaryDataSource") DataSource dataSource) {
+        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
+        emf.setDataSource(dataSource);
+        emf.setPackagesToScan("com.example.employeemanagementsystem.entity");
+        emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        return emf;
+    }
+
+    @Bean
+    @Primary
+    public PlatformTransactionManager primaryTransactionManager(
+            @Qualifier("primaryEntityManagerFactory") EntityManagerFactory emf) {
+        return new JpaTransactionManager(emf);
+    }
+    @Bean
+    @ConfigurationProperties("spring.datasource.secondary")
+    public DataSourceProperties secondaryDataSourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    public DataSource secondaryDataSource() {
+        return secondaryDataSourceProperties().initializeDataSourceBuilder().build();
+    }
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
+            @Qualifier("secondaryDataSource") DataSource dataSource) {
+        LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
+        emf.setDataSource(dataSource);
+        emf.setPackagesToScan("com.example.employeemanagementsystem.entity");
+        emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        return emf;
+    }
+
+    @Bean
+    public PlatformTransactionManager secondaryTransactionManager(
+            @Qualifier("secondaryEntityManagerFactory") EntityManagerFactory emf) {
+        return new JpaTransactionManager(emf);
+    }
+}

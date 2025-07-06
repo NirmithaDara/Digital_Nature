@@ -1,0 +1,73 @@
+
+package com.example.employeemanagementsystem.projection;
+
+public interface EmployeeBasicInfo {
+    String getName();
+    String getEmail();
+}
+
+public class EmployeeDTO {
+    private String name;
+    private String email;
+    private String departmentName;
+
+    public EmployeeDTO(String name, String email, String departmentName) {
+        this.name = name;
+        this.email = email;
+        this.departmentName = departmentName;
+    }
+
+
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public String getDepartmentName() { return departmentName; }
+}
+
+package com.example.employeemanagementsystem.repository;
+
+import com.example.employeemanagementsystem.entity.Employee;
+import com.example.employeemanagementsystem.projection.EmployeeBasicInfo;
+import com.example.employeemanagementsystem.projection.EmployeeDTO;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+    List<EmployeeBasicInfo> findByDepartmentId(Long departmentId);
+
+   
+    @Query("SELECT new com.example.employeemanagementsystem.projection.EmployeeDTO(e.name, e.email, e.department.name) FROM Employee e")
+    List<EmployeeDTO> findAllEmployeeDTOs();
+}
+
+
+package com.example.employeemanagementsystem.controller;
+
+import com.example.employeemanagementsystem.projection.EmployeeBasicInfo;
+import com.example.employeemanagementsystem.projection.EmployeeDTO;
+import com.example.employeemanagementsystem.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/projections")
+public class ProjectionController {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+     @GetMapping("/employees/basic/{deptId}")
+    public List<EmployeeBasicInfo> getBasicInfo(@PathVariable Long deptId) {
+        return employeeRepository.findByDepartmentId(deptId);
+    }
+
+  
+    @GetMapping("/employees/dto")
+    public List<EmployeeDTO> getEmployeeDTOs() {
+        return employeeRepository.findAllEmployeeDTOs();
+    }
+}

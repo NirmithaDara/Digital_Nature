@@ -1,0 +1,53 @@
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
+
+public class LibraryManagementApplication {
+
+    public static void main(String[] args) {
+                GenericApplicationContext context = new GenericXmlApplicationContext(
+            new ByteArrayResource(XML_CONFIG.getBytes())
+        );
+
+        
+        BookService bookService = context.getBean(BookService.class);
+        bookService.displayBook();
+
+        context.close();
+    }
+
+        private static final String XML_CONFIG =
+        "<?xml version='1.0' encoding='UTF-8'?>" +
+        "<beans xmlns='http://www.springframework.org/schema/beans'" +
+        "       xmlns:context='http://www.springframework.org/schema/context'" +
+        "       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'" +
+        "       xsi:schemaLocation='http://www.springframework.org/schema/beans " +
+        "           http://www.springframework.org/schema/beans/spring-beans.xsd " +
+        "           http://www.springframework.org/schema/context " +
+        "           http://www.springframework.org/schema/context/spring-context.xsd'>" +
+
+      
+        "   <context:component-scan base-package='LibraryManagementApplication' />" +
+        "</beans>";
+    @Repository
+    public static class BookRepository {
+        public String getBookTitle() {
+            return "The Lord of the Rings by J.R.R. Tolkien";
+        }
+    }
+
+
+    @Service
+    public static class BookService {
+
+        @Autowired
+        private BookRepository bookRepository;
+
+        public void displayBook() {
+            System.out.println("Book Retrieved: " + bookRepository.getBookTitle());
+        }
+    }
+}
