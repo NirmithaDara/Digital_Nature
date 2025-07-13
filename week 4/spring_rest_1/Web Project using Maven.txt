@@ -1,0 +1,27 @@
+package com.cognizant.springlearn;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+// Main Spring Boot Application
+@SpringBootApplication
+public class SpringLearnApplication {
+
+    public static void main(String[] args) {
+        System.out.println("SpringLearnApplication starting...");
+        SpringApplication.run(SpringLearnApplication.class, args);
+        System.out.println("SpringLearnApplication started successfully.");
+    }
+
+    // Sample Controller inside the same file
+    @RestController
+    public static class HelloController {
+
+        @GetMapping("/hello")
+        public String sayHello() {
+            return "Hello from SpringLearn!";
+        }
+    }
+}

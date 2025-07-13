@@ -1,0 +1,131 @@
+package com.cognizant.springlearn;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@SpringBootApplication
+@ImportResource("classpath:employee.xml")
+public class SpringLearnApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringLearnApplication.class, args);
+    }
+
+    // Bean to load employeeDao from employee.xml
+    @Bean
+    public EmployeeDao employeeDao() {
+        ApplicationContext context = new ClassPathXmlApplicationContext("employee.xml");
+        return context.getBean("employeeDao", EmployeeDao.class);
+    }
+}
+
+@RestController
+@RequestMapping("/employees")
+class EmployeeController {
+
+    private final EmployeeService employeeService;
+
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        return employeeService.getAllEmployees();
+    }
+} 
+
+@Service
+class EmployeeService {
+
+    private final EmployeeDao employeeDao;
+
+    public EmployeeService(EmployeeDao employeeDao) {
+        this.employeeDao = employeeDao;
+    }
+
+    @Transactional
+    public List<Employee> getAllEmployees() {
+        return employeeDao.getAllEmployees();
+    }
+}
+
+
+
+class EmployeeDao {
+    private static List<Employee> EMPLOYEE_LIST;
+
+    public EmployeeDao(List<Employee> employeeList) {
+        EMPLOYEE_LIST = employeeList;
+    }
+
+    public List<Employee> getAllEmployees() {
+        return EMPLOYEE_LIST;
+    }
+}
+
+
+
+class Employee {
+    private int id;
+    private String name;
+    private double salary;
+    private boolean permanent;
+    private Department department;
+    private List<Skill> skills;
+
+    public Employee() {}
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public double getSalary() { return salary; }
+    public void setSalary(double salary) { this.salary = salary; }
+
+    public boolean isPermanent() { return permanent; }
+    public void setPermanent(boolean permanent) { this.permanent = permanent; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
+
+    public List<Skill> getSkills() { return skills; }
+    public void setSkills(List<Skill> skills) { this.skills = skills; }
+}
+
+class Department {
+    private int id;
+    private String name;
+
+    public Department() {}
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}
+
+class Skill {
+    private int id;
+    private String name;
+
+    public Skill() {}
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}

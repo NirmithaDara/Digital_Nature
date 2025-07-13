@@ -1,0 +1,38 @@
+package com.cognizant.springlearn;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+@SpringBootApplication
+public class SpringLearnApplication {
+
+    public static void main(String[] args) {
+        System.out.println("SpringLearnApplication starting...");
+        SpringApplication.run(SpringLearnApplication.class, args);
+        System.out.println("SpringLearnApplication started successfully.");
+
+        // Call method to load date from XML-based bean
+        displayDate();
+    }
+
+    public static void displayDate() {
+        // Load XML configuration
+        ApplicationContext context = new ClassPathXmlApplicationContext("date-format.xml");
+
+        // Get the dateFormat bean
+        SimpleDateFormat format = context.getBean("dateFormat", SimpleDateFormat.class);
+
+        try {
+            // Parse date string to Date object
+            Date date = format.parse("31/12/2018");
+            System.out.println("Parsed Date: " + date);
+        } catch (Exception e) {
+            System.out.println("Error parsing date: " + e.getMessage());
+        }
+    }
+}
